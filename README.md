@@ -14,7 +14,7 @@ you can have a lot more control over how they behave as well.
 A lot of times is probably best to start with a simple setup like this, with no framework included, and maybe just add
 things like extra dependencies or frameworks later on, if you really see a need.
 
-For more on building out your AI agents, check out the "12 Factor Agents" guide as well. That is a good read.
+For more on building out your AI agents, check out the ["12 Factor Agents"](https://github.com/humanlayer/12-factor-agents) guide as well. That is a good read.
 
 ## What does the agent do?
 
