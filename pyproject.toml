@@ -1,8 +1,9 @@
 [project]
 name = "basic-react-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "A super simple setup of a ReAct agent"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.66.0",
