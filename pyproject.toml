@@ -8,4 +8,5 @@ dependencies = [
     "anthropic>=0.66.0",
     "pydantic>=2.11.7",
     "python-dotenv>=1.1.1",
+    "rich>=14.1.0",
 ]

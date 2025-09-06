@@ -1,9 +1,13 @@
 from abc import ABC
 
 from pydantic import BaseModel
+from rich.console import Console
+from rich.panel import Panel
 from app.context_window import ContextWindow, UserMessage, AssistantMessage, ToolUse, ToolResult, ToolUseMessage, \
     ToolResultMessage
 from app.claude_client import ClaudeClient
+
+console = Console()
 
 
 class Tool(BaseModel):
@@ -16,7 +20,7 @@ system_prompt = """You are an AI assistant that takes Pizza Deliveries for the p
 
 Once you start chatting with a user, get their name, and check if they already exist in our system by using the get_user_information tool.
 
-If they do not exist, make sure to get their address.
+If they do not exist, make sure to get their address. Even just a city name is enough.
 
 Ask what sort of pizza they would like to order. Once you have all the information you need, use the create_order tool to place the order.
 
@@ -85,21 +89,26 @@ class PizzaAgent(AgentInterface):
             tools=[tool.model_dump() for tool in tools]
         )
 
-        print(response)
-
         if response.stop_reason == "tool_use":
             # Add tool use to context
             for content_block in response.content:
                 if content_block.type == "tool_use":
                     # Add tool use message
                     tool_use = ToolUse(id="1", name=content_block.name, input=content_block.input)
-                    self.context.add(ToolUseMessage(content=[tool_use]))
+                    tool_use_msg = ToolUseMessage(content=[tool_use])
+                    self.context.add(tool_use_msg)
 
-                    tool_result = self._execute_tool(tool_use.name, tool_use.input)
+                    # Display tool use in orange box
+                    self._print_tool_use(tool_use)
+                    tool_result_response = self._execute_tool(tool_use.name, tool_use.input)
 
                     # Add tool result to context
-                    tool_result_msg = ToolResult(tool_use_id="1", content=tool_result, is_error=False)
-                    self.context.add(ToolResultMessage(content=[tool_result_msg]))
+                    tool_result = ToolResult(tool_use_id="1", content=tool_result_response, is_error=False)
+                    tool_result_message = ToolResultMessage(content=[tool_result])
+                    self.context.add(tool_result_message)
+
+                    # Display tool result in red box
+                    self._print_tool_result(tool_result)
 
             # Make another API call to continue the conversation
             return self.act()
@@ -117,3 +126,17 @@ class PizzaAgent(AgentInterface):
             return f"Order {order_id} created for {pizza_description} to be delivered to {address}"
         else:
             return f"Unknown tool: {tool_name}"
+
+    def _print_tool_use(self, tool_use: ToolUse):
+        console.print(Panel(
+            f"Tool: {tool_use.name}\nInput: {tool_use.input}",
+            title="🔧 Tool Use",
+            border_style="orange3"
+        ))
+
+    def _print_tool_result(self, tool_result: ToolResult):
+        console.print(Panel(
+            f"Result: {tool_result.content}",
+            title="📊 Tool Result",
+            border_style="red3"
+        ))

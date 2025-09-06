@@ -19,7 +19,6 @@ class ClaudeClient:
             tools
     ) -> Message:
         try:
-            print(messages)
             return self.client.messages.create(
                 max_tokens=1028,
                 model="claude-opus-4-20250514",
